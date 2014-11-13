@@ -1,3 +1,4 @@
+#' @export
 MTM<-function(Y,Xf=NULL,K=NULL,
                 resCov=list(type='UN',df0=0,S0=diag(0,ncol(as.matrix(Y)))),                          
                 nIter=110,burnIn=10,thin=2,saveAt='',tolD=1e-5){
