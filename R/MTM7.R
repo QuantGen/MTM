@@ -4,7 +4,6 @@ MTM<-function(Y,Xf=NULL,K=NULL,
                 nIter=110,burnIn=10,thin=2,saveAt='',tolD=1e-5){
     
     if((nIter-burnIn-thin)<0){stop('nIter must be greater than thin+burnIn')}           
-    library(MCMCpack)   
     iter<-0
     
     Y<-as.matrix(Y)
@@ -490,7 +489,6 @@ B0[3,2]<-.2
 
 G0<-B0%*%diag(PSI0)%*%t(B0)
 U<-matrix(nrow=1000,ncol=3,rnorm(3000))%*%chol(G0)
-library(MCMCpack)
 sB<-matrix(nrow=120,ncol=9,NA)
 sPSI<-matrix(nrow=120,ncol=3,NA)
 sG<-matrix(nrow=120,ncol=6,NA)
@@ -558,7 +556,6 @@ sampleG.FA<-function(U,F,M,B,PSI,G,traits,nF,n,
                 
 
 if(FALSE){
-library(MCMCpack)
 B<-matrix(nrow=7,ncol=2,0)
 B[5:7,2]<-.5
 B[1:4,1]<-.5

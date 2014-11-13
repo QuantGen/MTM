@@ -5,3 +5,5 @@ Title:
 Description: 
 Author: Gustavo de los Campos <gcampos@uab.edu>
 Maintainer: Alexander Grüneberg <alexander.grueneberg@googlemail.com>
+Imports:
+    MCMCpack
