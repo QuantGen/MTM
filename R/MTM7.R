@@ -1,3 +1,15 @@
+#' MTM
+#'
+#' @param Y Phenotypes
+#' @param Xf Incidence matrix
+#' @param K Kernel
+#' @param resCov Residual variance
+#' @param nIter Number of iterations
+#' @param burnIn
+#' @param thin
+#' @param saveAt
+#' @param tolD
+#' @return Model
 #' @export
 MTM<-function(Y,Xf=NULL,K=NULL,
                 resCov=list(type='UN',df0=0,S0=diag(0,ncol(as.matrix(Y)))),                          
