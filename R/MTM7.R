@@ -173,7 +173,7 @@ MTM <- function(Y, Xf = NULL, K = NULL, resCov = list(type = "UN", df0 = 0, S0 =
                     tmp <- tmp$U0/sqrt(K[[k]]$d)
                     SS <- crossprod(tmp) + K[[k]]$COV$S0
                     df <- K[[k]]$nD + K[[k]]$COV$df0
-                    K[[k]]$G <- riwish(S = SS, v = df)
+                    K[[k]]$G <- MCMCpack::riwish(S = SS, v = df)
                   }
 
                   if (K[[k]]$COV$type == "REC") {
@@ -215,7 +215,7 @@ MTM <- function(Y, Xf = NULL, K = NULL, resCov = list(type = "UN", df0 = 0, S0 =
         if (resCov$type == "UN") {
             SS <- crossprod(E) + resCov$S0
             df <- n + resCov$df0
-            resCov$R <- riwish(v = df, S = SS)
+            resCov$R <- MCMCpack::riwish(v = df, S = SS)
             resCov$L <- chol(resCov$R)
             resCov$RInv <- chol2inv(resCov$L)
         }
@@ -313,7 +313,7 @@ MTM <- function(Y, Xf = NULL, K = NULL, resCov = list(type = "UN", df0 = 0, S0 =
             write(tmp, ncol = length(tmp), file = fileName, append = T, sep = " ")
 
 
-            tmp <- vech(resCov$R)
+            tmp <- MCMCpack::vech(resCov$R)
             fileName <- paste(saveAt, "R.dat", sep = "")
             write(tmp, ncol = length(tmp), file = fileName, append = T, sep = " ")
 
@@ -341,7 +341,7 @@ MTM <- function(Y, Xf = NULL, K = NULL, resCov = list(type = "UN", df0 = 0, S0 =
 
             if (hasK) {
                 for (k in 1:nK) {
-                  tmp <- vech(K[[k]]$G)
+                  tmp <- MCMCpack::vech(K[[k]]$G)
                   fileName <- paste(saveAt, "G_", k, ".dat", sep = "")
                   write(tmp, ncol = length(tmp), file = fileName, append = T, sep = " ")
 
