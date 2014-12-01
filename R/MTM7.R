@@ -12,6 +12,7 @@
 #' @param thin
 #' @param saveAt
 #' @param tolD
+#' @example examples/MTM.R
 #' @return Model
 #' @export
 MTM <- function(Y, Xf = NULL, K = NULL, resCov = list(type = "UN", df0 = 0, S0 = diag(0,
