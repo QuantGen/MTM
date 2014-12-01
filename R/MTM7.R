@@ -1,5 +1,8 @@
 #' MTM
 #'
+#' \code{MTM} does inference of parameters from the posterior distribution of
+#' a multivariate normal model with structured co-variance matrices.
+#'
 #' @param Y Phenotypes
 #' @param Xf Incidence matrix
 #' @param K Kernel

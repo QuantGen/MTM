@@ -30,6 +30,7 @@ MTM(Y, Xf = NULL, K = NULL, resCov = list(type = "UN", df0 = 0, S0 =
 Model
 }
 \description{
-MTM
+\code{MTM} does inference of parameters from the posterior distribution of
+a multivariate normal model with structured co-variance matrices.
 }
 
