@@ -1,22 +1,54 @@
-#' MTM
+#' Fits a (Bayesian) Multivariate Gaussian Mixed Effects Model using a Gibbs
+#' Sampler.
 #'
-#' \code{MTM} does inference of parameters from the posterior distribution of
-#' a multivariate normal model with structured co-variance matrices.
+#' Data equation: Y = 1mu' + XB + U1 + ... + Uq + E \cr\cr where: \itemize{
+#' \item{Y (numeric, nxp) is a matrix of phenotypes (individuals in rows, traits
+#' in columns, NAs accepted),} \item{mu is a vector of (p) intercepts (included
+#' by default),} \item{X (nxq) is an incidence matrix for q fixed effects,}
+#' \item{B (qxp) is a matrix of fixed effects,} \item{U1, ..., Uq are (nxq)
+#' matrices of random effects with vec(Uj)~N(0, kronecker(Gj,Kj)), where Gj is a
+#' pxp (unknown) co-variance matrix, and Kj is an nxn user-defined covariance
+#' matrix (kernel) which must by numeric, symmetric positive semi-definite,}
+#' \item{E (nxp) is a matrix of model residuals, assumed to follow a MVN
+#' distribution vec(E)~N(0, kronecker(R0, I)).} }
 #'
-#' @param Y Phenotypes
-#' @param Xf Incidence matrix
-#' @param K Kernel
-#' @param resCov Residual variance
-#' @param nIter Number of iterations
-#' @param burnIn
-#' @param thin
-#' @param saveAt
-#' @param tolD
+#' Intercepts are included by default, fixed and random effects are optional.
+#' The same fixed effects are applied to all traits. For each random effect the
+#' user must provide a kernel (K). By default the residual co-variance matrix
+#' (R0) and the co-variance matrices of random effects are un-structured;
+#' however users can specify other models (e.g., DIAG=diagonal, FA=factor
+#' analysis, and REC=recursive). Further details about this are provided in
+#' MTM.pdf.
+#'
+#' @param Y Phenotype matrix (nxp numeric, traits (p) in columns, individuals
+#'   (n) in rows).
+#' @param K A 2-level list, 1st level defines random effects, inside each level
+#'   a list is used to provide the kernel (K), a covariance structure (type,
+#'   'UN', 'DIAG', 'FA' supported) and hyper-parameters (degree of freedom, df0,
+#'   and scale, S0). For further details see MTM.pdf.
+#' @param resCov A list used to define the co-variance matrix for model
+#'   residuals (R0). Example: resCov=list(type='UN', df0=x, S0=V) specifies an
+#'   un-structured covariance matrix, with an Inverse Whishart prior with degree
+#'   of freedom df0 (scalar) and scale matrix (pxp) V. For other options (FA,
+#'   REC, DIAG) see MTM.pdf.
+#' @param nIter The number of iterations (integer).
+#' @param thin Thinin interval (integer).
+#' @param burnIn The number of iterations to be discarded as burn-in (integer).
+#' @param Xf A numeric design matrix (nxq) for fixed effects. For factors use
+#'   Xf=as.matrix(model.matrix(~x+y...))[, -1].
+#' @param saveAt A character path and a prefix used to define where to store
+#'   samples (e.g., saveAt=c:/mtmFit/test_'. By default samples are saved in the
+#'   current directory and filenames have no prefix.
+#' @param tolD A numeric parameter used to define the minimum eigenvalue to be
+#'   maintained in the model. Eigenvectors of kernels smaller than tolD are
+#'   removed. The default value is tolD=1e-6.
 #' @example examples/MTM.R
-#' @return Model
+#' @return A list containing estimated posterior means and estimated posterior
+#'   standard deviations, including: $yHat...
 #' @export
-MTM <- function(Y, Xf = NULL, K = NULL, resCov = list(type = "UN", df0 = 0, S0 = diag(0,
-    ncol(as.matrix(Y)))), nIter = 110, burnIn = 10, thin = 2, saveAt = "", tolD = 1e-05) {
+MTM <- function(Y, Xf = NULL, K = NULL,
+                resCov = list(type = "UN", df0 = 0, S0 = diag(0,ncol(as.matrix(Y)))),
+                nIter = 110, burnIn = 10, thin = 2, saveAt = "", tolD = 1e-05) {
 
     if ((nIter - burnIn - thin) < 0) {
         stop("nIter must be greater than thin+burnIn")
