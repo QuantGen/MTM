@@ -19,13 +19,12 @@ Xf=as.matrix(model.matrix(~x+y...))[, -1].}
 \item{K}{A 2-level list, 1st level defines random effects, inside each level
 a list is used to provide the kernel (K), a covariance structure (type,
 'UN', 'DIAG', 'FA' supported) and hyper-parameters (degree of freedom, df0,
-and scale, S0). For further details see MTM.pdf.}
+and scale, S0).}
 
 \item{resCov}{A list used to define the co-variance matrix for model
 residuals (R0). Example: resCov=list(type='UN', df0=x, S0=V) specifies an
 un-structured covariance matrix, with an Inverse Whishart prior with degree
-of freedom df0 (scalar) and scale matrix (pxp) V. For other options (FA,
-REC, DIAG) see MTM.pdf.}
+of freedom df0 (scalar) and scale matrix (pxp) V.}
 
 \item{nIter}{The number of iterations (integer).}
 
@@ -63,8 +62,7 @@ The same fixed effects are applied to all traits. For each random effect the
 user must provide a kernel (K). By default the residual co-variance matrix
 (R0) and the co-variance matrices of random effects are un-structured;
 however users can specify other models (e.g., DIAG=diagonal, FA=factor
-analysis, and REC=recursive). Further details about this are provided in
-MTM.pdf.
+analysis, and REC=recursive).
 }
 \examples{
 library(BGLR)
