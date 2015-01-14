@@ -1,4 +1,4 @@
-Package: mtm7
+Package: MTM
 Version: 1.0.0
 License: MIT
 Title: 
@@ -7,5 +7,6 @@ Author: Gustavo de los Campos <gcampos@uab.edu>
 Maintainer: Alexander Grüneberg <alexander.grueneberg@googlemail.com>
 Imports:
     MCMCpack
-Suggests: knitr
+Suggests:
+    knitr
 VignetteBuilder: knitr
