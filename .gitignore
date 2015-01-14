@@ -3,11 +3,4 @@ Icon
 .Rhistory
 .Rproj.user
 inst/doc
-
-logLik.dat
-R.dat
-B_R.dat
-mu.dat
-G_*.dat
-PSI_G_*.dat
-B_G_*.dat
+*.dat
