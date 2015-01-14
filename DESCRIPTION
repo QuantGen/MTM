@@ -1,6 +1,6 @@
 Package: MTM
 Version: 1.0.0
-License: MIT
+License: MIT + file LICENSE
 Title: MTM
 Description: Fits a (Bayesian) Multivariate Gaussian Mixed Effects Model using a Gibbs Sampler.
 Author: Gustavo de los Campos <gcampos@uab.edu>
