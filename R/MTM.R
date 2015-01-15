@@ -32,8 +32,8 @@
 #' @param nIter The number of iterations (integer).
 #' @param thin Thinin interval (integer).
 #' @param burnIn The number of iterations to be discarded as burn-in (integer).
-#' @param Xf A numeric design matrix (nxq) for fixed effects. For factors use
-#'   Xf=as.matrix(model.matrix(~x+y...))[, -1].
+#' @param XF A numeric design matrix (nxq) for fixed effects. For factors use
+#'   XF=as.matrix(model.matrix(~x+y...))[, -1].
 #' @param saveAt A character path and a prefix used to define where to store
 #'   samples (e.g., saveAt='c:/mtmFit/test_'. By default samples are saved in the
 #'   current directory and filenames have no prefix.
@@ -44,7 +44,7 @@
 #' @return List containing estimated posterior means and estimated posterior
 #'   standard deviations, including: $yHat.
 #' @export
-MTM <- function(Y, Xf = NULL, K = NULL,
+MTM <- function(Y, XF = NULL, K = NULL,
                 resCov = list(type = "UN", df0 = 0, S0 = diag(0,ncol(as.matrix(Y)))),
                 nIter = 110, burnIn = 10, thin = 2, saveAt = "", tolD = 1e-05) {
 
@@ -56,7 +56,7 @@ MTM <- function(Y, Xf = NULL, K = NULL,
     Y <- as.matrix(Y)
     traits <- ncol(Y)
     n <- nrow(Y)
-    hasXf <- !is.null(Xf)
+    hasXF <- !is.null(XF)
     hasK <- !is.null(K)
 
     ## Initializing overall mean
@@ -85,21 +85,21 @@ MTM <- function(Y, Xf = NULL, K = NULL,
     E <- t(t(YStar) - mu)
 
     ## Initializing Fixed effects
-    if (hasXf) {
-        Xf <- as.matrix(Xf)
-        dimX.f <- ncol(Xf)
-        tmp <- eigen(crossprod(Xf))
+    if (hasXF) {
+        XF <- as.matrix(XF)
+        dimX.f <- ncol(XF)
+        tmp <- eigen(crossprod(XF))
         if (any(tmp$values < 0)) {
-            Stop("Xf is not full-column rank")
+            Stop("XF is not full-column rank")
         }
         Tb.f <- tmp$vectors %*% diag(1/sqrt(tmp$values))
-        XTb.f <- Xf %*% Tb.f
+        XTb.f <- XF %*% Tb.f
         B.f <- matrix(nrow = dimX.f, ncol = traits, 0)
         for (i in 1:traits) {
-            B.f[, i] <- lm(E[, i] ~ Xf - 1)$coef
+            B.f[, i] <- lm(E[, i] ~ XF - 1)$coef
         }
         post_B.f <- B.f
-        E <- E - Xf %*% B.f
+        E <- E - XF %*% B.f
     }
 
     ## Initialization R0
@@ -185,11 +185,11 @@ MTM <- function(Y, Xf = NULL, K = NULL,
 
         logLik <- 0
         ## Fixed effects
-        if (hasXf) {
-            E <- E + Xf %*% B.f
+        if (hasXF) {
+            E <- E + XF %*% B.f
             B.f <- sampleBf(Y = E, XTb = XTb.f, Tb = Tb.f, R = resCov$R, L = resCov$L,
                 RInv = resCov$RInv, traits = traits, dimX = dimX.f)
-            E <- E - Xf %*% B.f
+            E <- E - XF %*% B.f
         }
 
         ## Kernels
@@ -320,7 +320,7 @@ MTM <- function(Y, Xf = NULL, K = NULL,
                 resCov$post_PSI <- resCov$post_PSI * k + resCov$PSI/iter
             }
 
-            if (hasXf) {
+            if (hasXF) {
                 post_B.f <- post_B.f * k + B.f/iter
             }
 
@@ -367,7 +367,7 @@ MTM <- function(Y, Xf = NULL, K = NULL,
             fileName <- paste(saveAt, "mu", ".dat", sep = "")
             write(tmp, ncol = length(tmp), file = fileName, append = T, sep = " ")
 
-            if (hasXf) {
+            if (hasXF) {
                 tmp <- as.numeric(B.f)
                 fileName <- paste(saveAt, "mu", ".dat", sep = "")
                 write(tmp, ncol = length(tmp), file = fileName, append = T, sep = " ")
@@ -409,7 +409,7 @@ MTM <- function(Y, Xf = NULL, K = NULL,
     }
     out <- list(mu = post_mu, YHat = post_YHat, resCov = tmp)
 
-    if (hasXf) {
+    if (hasXF) {
         out$B.f = post_B.f
     }
 

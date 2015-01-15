@@ -5,7 +5,7 @@
 \title{Fits a (Bayesian) Multivariate Gaussian Mixed Effects Model using a Gibbs
 Sampler.}
 \usage{
-MTM(Y, Xf = NULL, K = NULL, resCov = list(type = "UN", df0 = 0, S0 =
+MTM(Y, XF = NULL, K = NULL, resCov = list(type = "UN", df0 = 0, S0 =
   diag(0, ncol(as.matrix(Y)))), nIter = 110, burnIn = 10, thin = 2,
   saveAt = "", tolD = 1e-05)
 }
@@ -13,8 +13,8 @@ MTM(Y, Xf = NULL, K = NULL, resCov = list(type = "UN", df0 = 0, S0 =
 \item{Y}{Phenotype matrix (nxp numeric, traits (p) in columns, individuals
 (n) in rows).}
 
-\item{Xf}{A numeric design matrix (nxq) for fixed effects. For factors use
-Xf=as.matrix(model.matrix(~x+y...))[, -1].}
+\item{XF}{A numeric design matrix (nxq) for fixed effects. For factors use
+XF=as.matrix(model.matrix(~x+y...))[, -1].}
 
 \item{K}{A 2-level list, 1st level defines random effects, inside each level
 a list is used to provide the kernel (K), a covariance structure (type,
