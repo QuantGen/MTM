@@ -33,7 +33,7 @@ of freedom df0 (scalar) and scale matrix (pxp) V.}
 \item{thin}{Thinin interval (integer).}
 
 \item{saveAt}{A character path and a prefix used to define where to store
-samples (e.g., saveAt=c:/mtmFit/test_'. By default samples are saved in the
+samples (e.g., saveAt='c:/mtmFit/test_'. By default samples are saved in the
 current directory and filenames have no prefix.}
 
 \item{tolD}{A numeric parameter used to define the minimum eigenvalue to be
@@ -41,17 +41,17 @@ maintained in the model. Eigenvectors of kernels smaller than tolD are
 removed. The default value is tolD=1e-6.}
 }
 \value{
-A list containing estimated posterior means and estimated posterior
-  standard deviations, including: $yHat...
+List containing estimated posterior means and estimated posterior
+  standard deviations, including: $yHat.
 }
 \description{
 Data equation: Y = 1mu' + XB + U1 + ... + Uq + E \cr\cr where: \itemize{
 \item{Y (numeric, nxp) is a matrix of phenotypes (individuals in rows, traits
 in columns, NAs accepted),} \item{mu is a vector of (p) intercepts (included
 by default),} \item{X (nxq) is an incidence matrix for q fixed effects,}
-\item{B (qxp) is a matrix of fixed effects,} \item{U1, ..., Uq are (nxq)
-matrices of random effects with vec(Uj)~N(0, kronecker(Gj,Kj)), where Gj is a
-pxp (unknown) co-variance matrix, and Kj is an nxn user-defined covariance
+\item{B is a matrix of fixed effects,} \item{U1, ..., Uq are (nxq)
+matrices of random effects with vec(Uj)~N(0, kronecker(Gj, Kj)), where Gj is a
+pxp (unknown) co-variance matrix, Kj is an nxn user-defined covariance
 matrix (kernel) which must by numeric, symmetric positive semi-definite,}
 \item{E (nxp) is a matrix of model residuals, assumed to follow a MVN
 distribution vec(E)~N(0, kronecker(R0, I)).} }
