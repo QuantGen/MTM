@@ -541,41 +541,6 @@ sampleG.REC <- function(U, M, PSI, traits, priorVar = 100, df0 = rep(0, traits),
 
 
 
-
-if (FALSE) {
-
-    PSI0 <- c(1, 1, 2)
-    B0 <- diag(3)
-    B0[2, 1] <- 0.5
-    B0[3, 1] <- -0.5
-    B0[3, 2] <- 0.2
-
-    G0 <- B0 %*% diag(PSI0) %*% t(B0)
-    U <- matrix(nrow = 1000, ncol = 3, rnorm(3000)) %*% chol(G0)
-    sB <- matrix(nrow = 120, ncol = 9, NA)
-    sPSI <- matrix(nrow = 120, ncol = 3, NA)
-    sG <- matrix(nrow = 120, ncol = 6, NA)
-    sG[1, ] <- vech(var(U))
-    sPSI[1, ] <- diag(var(U))
-    sB[1, ] <- as.numeric(diag(3))
-    M <- matrix(nrow = 3, ncol = 3, FALSE)
-    M[2, 1] <- M[3, 1] <- M[3, 2] <- TRUE
-
-
-    for (i in 2:nrow(sB)) {
-        tmp <- sampleG.REC(U = U, M = M, PSI = sPSI[(i - 1), ], traits = 3, priorVar = 1000,
-            df0 = 0, S0 = 0)
-        sPSI[i, ] <- tmp$PSI
-        sG[i, ] <- vech(tmp$G)
-        sB[i, ] <- as.numeric(tmp$B)
-    }
-
-    BHat <- matrix(nrow = 3, ncol = 3, colMeans(sB[20:120, ]))
-    GHat <- xpnd(colMeans(sG[20:120, ]))
-    PSIHat <- colMeans(sPSI[20:120, ])
-
-}
-
 ############################################################################################
 sampleG.FA <- function(U, F, M, B, PSI, G, traits, nF, n, df0 = rep(1, traits), S0 = rep(1/100,
     traits), priorVar = 100) {
@@ -613,37 +578,6 @@ sampleG.FA <- function(U, F, M, B, PSI, G, traits, nF, n, df0 = rep(1, traits), 
     }
     G <- tcrossprod(B) + diag(PSI)
     out <- list(F = F, PSI = PSI, B = B, G = G)
-}
-
-
-if (FALSE) {
-    B <- matrix(nrow = 7, ncol = 2, 0)
-    B[5:7, 2] <- 0.5
-    B[1:4, 1] <- 0.5
-    M <- ifelse(B > 0, TRUE, FALSE)
-    PSI <- rep(0.2, 7)
-    G <- tcrossprod(B) + diag(PSI)
-    U <- matrix(nrow = 100, ncol = 7, rnorm(700)) %*% (chol(G))
-
-    sG <- matrix(nrow = 5000, ncol = 28, NA)
-    sG[1, ] <- vech(G)
-    sB <- matrix(nrow = 5000, ncol = 14, NA)
-    sB[1, ] <- as.numeric((B))
-    sPSI <- matrix(nrow = 5000, ncol = 7, NA)
-    sPSI[1, ] <- PSI
-
-    for (i in 2:5000) {
-        tmpB <- matrix(sB[(i - 1), ], ncol = 2)
-        tmpPSI <- sPSI[(i - 1), ]
-        tmpG <- xpnd(sG[(i - 1), ])
-        tmp <- sampleG.FA(U = U, M = M, B = tmpB, G = tmpG, traits = 7, PSI = tmpPSI,
-            CV = 1/20, DF = 30, rounds = 3)
-        sPSI[i, ] <- tmp$PSI
-        sG[i, ] <- vech(tmp$G)
-        sB[i, ] <- tmp$B
-
-    }
-
 }
 
 ########################################################################################################################
