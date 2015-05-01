@@ -1,0 +1,158 @@
+---
+title: "MTM"
+output: html_document
+---
+
+Description
+-----------
+
+This program does inference of parameters from the posterior distribution of a multivariate normal model with structured co-variance matrices.
+
+Models Implemented
+------------------
+
+1. The Univariate Linear Additive Genetic Model
+    1. Model with one trait (Y with $n$ subjects)
+
+        $$ y | \beta, a, \sigma^2_e \sim N(X\beta + Za, I\sigma^2_e) $$
+
+        - $\beta$: a vector of fixed effects
+        - $X$ and $Z$: incidence matrices associating $\beta$ and $a$ with $y$
+        - $I$: an identity matrix of order $n \times n$
+        - $\sigma^2_e$: the residual variance of the model
+        - $a$: a vector of genetic values for trait Y
+            - $a | A, \sigma^2_a \sim N(0, A\sigma^2_a)$
+                - $A$: the additive genetic relationship matrix (expected proportion of allele sharing)
+                - $\sigma^2_a$: the genetic variance
+            - $a | G, \sigma^2_g \sim N(0, G\sigma^2_g)$
+                - $G$: the marker-based measure of allele sharing between individuals (realized proportion of allele sharing)
+                - $\sigma^2_g$: the genomic variance
+    2. Prior distribution for variances
+        1. Non-informative beta distribution
+        2. Proper uniform distribution
+
+            $$  p(\sigma^2_i) = \frac{1}{\sigma^2_{i\text{max}}}, 0 < \sigma^2_i < \sigma^2_{i\text{max}}, i = a, e$$
+        3. Scaled inverse chi-square distribution
+
+            $$ p(\sigma^2_i | v_i, S^2_i) \propto (\sigma^2_i)^{-(\frac{v_i}{2} + 2)} \exp\left(-\frac{v_iS^2_i}{2\sigma^2_i}\right), i = a, e $$
+    3. Joint posterior density
+
+        Assuming that $\beta$, $(a, \sigma^2_a)$, and $\sigma^2_e$ are independent a priori
+        $$ p(\beta, a, \sigma^2_a, \sigma^2_e | y) \propto p(\beta) p(a | \sigma^2_a) p(\sigma^2_a) p(\sigma^2_e) p(y | \beta, a, \sigma^2_e) $$
+2. The Multivariate Linear Additive Genetic Model
+    1. Model for two traits (Y and Z)
+
+        $$ \begin{bmatrix}
+             y \\
+             z
+           \end{bmatrix} = \begin{bmatrix}
+             X_y & 0 \\
+             0 & X_z
+           \end{bmatrix} \begin{bmatrix}
+             \beta_y \\
+             \beta_z
+           \end{bmatrix} + \begin{bmatrix}
+             Z_y & 0 \\
+             0 & Z_z
+           \end{bmatrix} \begin{bmatrix}
+             a_y \\
+             a_z
+           \end{bmatrix} + \begin{bmatrix}
+             e_y \\
+             e_z
+           \end{bmatrix} $$
+
+        - $\beta_y$ ($\beta_z$): a vector of fixed effects affecting each trait
+        - $X_y$ ($X_z$) and $Z_y$ ($Z_z$): incidence array relating location effects for each trait
+        - $e_y$ ($e_z$): a vector of residual effects for each trait
+        - $a_y$ ($a_z$): a vector of additive genetic values for each trait
+            - $a | G_0, A \sim N(0, G_0 \otimes A)$
+                - $A$: additive genetic relationship matrix
+                - $G_0 = \begin{bmatrix}
+                    \sigma^2_{a,y} & \sigma_{a,yz} \\
+                    \sigma_{a,yz} & \sigma^2_{a,z}
+                  \end{bmatrix}$, $2 \times 2$ ,matrix with additive (co)variance components
+            - $a | G_0, G \sim N(0, G_0 \otimes G)$
+                - $G$: the marker-based measure of allele sharing between individuals
+                - $G_0 = \begin{bmatrix}
+                    \sigma^2_{a,y} & \sigma_{a,yz} \\
+                    \sigma_{a,yz} & \sigma^2_{a,z}
+                  \end{bmatrix}$, $2 \times 2$ ,matrix with additive (co)variance components
+
+        $$ v | \beta, a, R_e \sim N(X\beta + Za, R) $$
+
+        - $v$ contains $y$ and $z$
+        - $X = \begin{bmatrix}
+            X_y & 0 \\
+            0 & X_z
+          \end{bmatrix}, Z = \begin{bmatrix}
+            Z_y & 0 \\
+            0 & Z_z
+          \end{bmatrix}$
+        - $R = I_n \otimes R_e$, the residual variance-covariance matrix
+            - $I_n$: $n \times n$ identity matrix
+            - $R_e = \begin{bmatrix}
+                \sigma^2_{e,y} & \sigma_{e,yz} \\
+                \sigma_{e,yz} & \sigma^2_{e,z}
+              \end{bmatrix}$, $2 \times 2$ residual dispersion matrix
+    2. Prior distributions for variances
+        1. Two-dimensional scaled inverted Wishart distribution for $R_e$ and $G_0$, where $p = \text{number of traits}$
+
+            $$ p(R_e | v_e, V_e) \propto |R_e|^{-\frac{1}{2}(v_e + p + 1)} \exp\left[-\frac{1}{2} \text{tr}(R^{-1}_e V^{-1}_e)\right] $$
+            $$ p(G_0 | v_a, V_a) \propto |G_0|^{-\frac{1}{2}(v_a + p + 1)} \exp\left[-\frac{1}{2} \text{tr}(G^{-1}_0 V^{-1}_a)\right] $$
+        2. Hyper-parameters of the distribution
+            - $v > p - 1$, degrees of freedom
+            - $V_i > 0, i = e, a$, scale matrix
+    3. Bivariate model with $p=2$
+
+        Set the mode $\left(\frac{V_i}{v + p + 1}\right)$ of the prior to be at half of variance of phenotype. Therefore, $v = 2$, $V_i = \text{Var}(Y) \times \frac{5}{2}$.
+
+*This section is incomplete and should be extended to describe models programmed in the REC, FA, UN and DIAG options.*
+
+
+Programming Syntaxes
+--------------------
+
+Phenotypes: Y matrix (n × q, where q is the number of traits, if some individuals have some traits that were not measured introduce NA's in Y, the program handles this).
+
+It handles a variable number of random effects, which are specified in the argument K (for kernel). K is a two level list. Each of the inner elements of the list is used to specify one random effect. For each random effect you need to provide a co-variance structure, see below K=G, and a type argument that specifies the form of the within subject covariance. The program supports several, the most important ones are type='UN', type='DIAG' and type='FA', which stands for unstructured, diagonal and factor-analytic, respectively. You also need to specify hyper-parameters for prior distribution. For UN we use an inverse-Whishart prior; therefore, you need to specify prior degrees of freedom (df0, real number, df0 > q - 1) and a scale matrix (S0, q × q positive definite, I usually use a diagonal scale matrix, see example below). For DIAG we assign scaled inverse chi-squares to each of the diagonal elements; therefore, df0 and S0 must be vectors (q-dimensional each), and each entry defines the degrees of freedom and scale parameter of a scaled inverse chi-square distribution. For FA you need to specify the number of factors (nF, integer, nF > 1). For this model you also need to specify the degrees of freedom and scale parameters of the variances of the specific factors, these are specified with a vector df0 and a vector S0.
+
+For the residual variance we indicate the structure and the hyper-parameters using the argument resCov, which is a list (see below).
+
+The program will introduce one intercept by default (fm$mu), if you want to include fixed effects you need to provide an incidence matrix (Xf, n × r, r = number of fixed effects). The program applies these effects to all traits.
+
+Example
+-------
+
+Example of the use of the script with the wheat data set available at BGLR library. The data has only 4 traits, the example uses un-structured co-variance matrix for the genetic part, and, since these records come from different sites, uses a diagonal co-variance matrix for the residuals.
+
+```{r, eval=FALSE}
+rm(list=ls())
+source('~/Dropbox/MTM/code/MTM7.r')
+
+library(BGLR)
+data(wheat)
+G<-tcrossprod(scale(wheat.X,center=TRUE,scale=TRUE))/ncol(wheat.X)
+
+nTraits<-ncol(wheat.Y)
+df0<-3
+R2<-0.5
+
+## NOTE: K is similar to ETA in BGLR, but only for RKHS in the case of this program.
+## One can provide K or EVD via V and d, I believe...
+## Use much longer chains, this is just an example!
+
+fm<-MTM(Y=wheat.Y,
+  K=list(
+    list(K=G,
+      COV=list(type='UN',df0=(df0+nTraits),S0=diag(R2*(df0+2*nTraits+1),nTraits))
+    )
+  ),
+  resCov=list(type='DIAG',df0=rep(df0,nTraits),S0=diag(R2*df0/(df0+2),nTraits)),
+  nIter=500,burnIn=100
+)
+## Some estimates
+fm$K[[1]]$G # estimated genomic covariance matrix
+fm$K[[1]]$U # predicted genomic values
+fm$resCov$R # estimated residual covariance matrix
+```
