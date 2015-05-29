@@ -1,6 +1,8 @@
 ---
 title: "MTM Package"
 output:
+  pdf_document:
+    toc: yes
   html_document:
     toc: yes
 ---
