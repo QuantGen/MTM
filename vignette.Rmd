@@ -1,158 +1,386 @@
 ---
-title: "MTM"
-output: html_document
+title: "MTM Package"
+output:
+  html_document:
+    toc: yes
 ---
 
-Description
------------
-
-This program does inference of parameters from the posterior distribution of a multivariate normal model with structured co-variance matrices.
-
-Models Implemented
-------------------
-
-1. The Univariate Linear Additive Genetic Model
-    1. Model with one trait (Y with $n$ subjects)
-
-        $$ y | \beta, a, \sigma^2_e \sim N(X\beta + Za, I\sigma^2_e) $$
-
-        - $\beta$: a vector of fixed effects
-        - $X$ and $Z$: incidence matrices associating $\beta$ and $a$ with $y$
-        - $I$: an identity matrix of order $n \times n$
-        - $\sigma^2_e$: the residual variance of the model
-        - $a$: a vector of genetic values for trait Y
-            - $a | A, \sigma^2_a \sim N(0, A\sigma^2_a)$
-                - $A$: the additive genetic relationship matrix (expected proportion of allele sharing)
-                - $\sigma^2_a$: the genetic variance
-            - $a | G, \sigma^2_g \sim N(0, G\sigma^2_g)$
-                - $G$: the marker-based measure of allele sharing between individuals (realized proportion of allele sharing)
-                - $\sigma^2_g$: the genomic variance
-    2. Prior distribution for variances
-        1. Non-informative beta distribution
-        2. Proper uniform distribution
-
-            $$  p(\sigma^2_i) = \frac{1}{\sigma^2_{i\text{max}}}, 0 < \sigma^2_i < \sigma^2_{i\text{max}}, i = a, e$$
-        3. Scaled inverse chi-square distribution
-
-            $$ p(\sigma^2_i | v_i, S^2_i) \propto (\sigma^2_i)^{-(\frac{v_i}{2} + 2)} \exp\left(-\frac{v_iS^2_i}{2\sigma^2_i}\right), i = a, e $$
-    3. Joint posterior density
-
-        Assuming that $\beta$, $(a, \sigma^2_a)$, and $\sigma^2_e$ are independent a priori
-        $$ p(\beta, a, \sigma^2_a, \sigma^2_e | y) \propto p(\beta) p(a | \sigma^2_a) p(\sigma^2_a) p(\sigma^2_e) p(y | \beta, a, \sigma^2_e) $$
-2. The Multivariate Linear Additive Genetic Model
-    1. Model for two traits (Y and Z)
-
-        $$ \begin{bmatrix}
-             y \\
-             z
-           \end{bmatrix} = \begin{bmatrix}
-             X_y & 0 \\
-             0 & X_z
-           \end{bmatrix} \begin{bmatrix}
-             \beta_y \\
-             \beta_z
-           \end{bmatrix} + \begin{bmatrix}
-             Z_y & 0 \\
-             0 & Z_z
-           \end{bmatrix} \begin{bmatrix}
-             a_y \\
-             a_z
-           \end{bmatrix} + \begin{bmatrix}
-             e_y \\
-             e_z
-           \end{bmatrix} $$
-
-        - $\beta_y$ ($\beta_z$): a vector of fixed effects affecting each trait
-        - $X_y$ ($X_z$) and $Z_y$ ($Z_z$): incidence array relating location effects for each trait
-        - $e_y$ ($e_z$): a vector of residual effects for each trait
-        - $a_y$ ($a_z$): a vector of additive genetic values for each trait
-            - $a | G_0, A \sim N(0, G_0 \otimes A)$
-                - $A$: additive genetic relationship matrix
-                - $G_0 = \begin{bmatrix}
-                    \sigma^2_{a,y} & \sigma_{a,yz} \\
-                    \sigma_{a,yz} & \sigma^2_{a,z}
-                  \end{bmatrix}$, $2 \times 2$ ,matrix with additive (co)variance components
-            - $a | G_0, G \sim N(0, G_0 \otimes G)$
-                - $G$: the marker-based measure of allele sharing between individuals
-                - $G_0 = \begin{bmatrix}
-                    \sigma^2_{a,y} & \sigma_{a,yz} \\
-                    \sigma_{a,yz} & \sigma^2_{a,z}
-                  \end{bmatrix}$, $2 \times 2$ ,matrix with additive (co)variance components
-
-        $$ v | \beta, a, R_e \sim N(X\beta + Za, R) $$
-
-        - $v$ contains $y$ and $z$
-        - $X = \begin{bmatrix}
-            X_y & 0 \\
-            0 & X_z
-          \end{bmatrix}, Z = \begin{bmatrix}
-            Z_y & 0 \\
-            0 & Z_z
-          \end{bmatrix}$
-        - $R = I_n \otimes R_e$, the residual variance-covariance matrix
-            - $I_n$: $n \times n$ identity matrix
-            - $R_e = \begin{bmatrix}
-                \sigma^2_{e,y} & \sigma_{e,yz} \\
-                \sigma_{e,yz} & \sigma^2_{e,z}
-              \end{bmatrix}$, $2 \times 2$ residual dispersion matrix
-    2. Prior distributions for variances
-        1. Two-dimensional scaled inverted Wishart distribution for $R_e$ and $G_0$, where $p = \text{number of traits}$
-
-            $$ p(R_e | v_e, V_e) \propto |R_e|^{-\frac{1}{2}(v_e + p + 1)} \exp\left[-\frac{1}{2} \text{tr}(R^{-1}_e V^{-1}_e)\right] $$
-            $$ p(G_0 | v_a, V_a) \propto |G_0|^{-\frac{1}{2}(v_a + p + 1)} \exp\left[-\frac{1}{2} \text{tr}(G^{-1}_0 V^{-1}_a)\right] $$
-        2. Hyper-parameters of the distribution
-            - $v > p - 1$, degrees of freedom
-            - $V_i > 0, i = e, a$, scale matrix
-    3. Bivariate model with $p=2$
-
-        Set the mode $\left(\frac{V_i}{v + p + 1}\right)$ of the prior to be at half of variance of phenotype. Therefore, $v = 2$, $V_i = \text{Var}(Y) \times \frac{5}{2}$.
-
-*This section is incomplete and should be extended to describe models programmed in the REC, FA, UN and DIAG options.*
 
 
-Programming Syntaxes
---------------------
+## Introduction
 
-Phenotypes: Y matrix (n × q, where q is the number of traits, if some individuals have some traits that were not measured introduce NA's in Y, the program handles this).
+MTM (Multiple-Trait Model) fits Bayesian Multivariate Gaussian models with an arbitrary number of random effects using a Gibbs sampler. The data equation for the jth trait (j = 1, ...) is expressed as
+$$ y_j = 1 \mu_j + X \beta_j + u_{j1} + \ldots + u_{jq} + \varepsilon_j $$
+where: $y_j = (y_{1j}, \ldots, y_{nj})'$ is an $n$-dimensional vector of phenotypes (`NA`s are allowed) with $y_{ij}$ representing the phenotypic record of the ith subject for the jth trait, $\mu_j$ is an intercept, $X$ a design matrix for fixed effects (the same effects are assumed for all traits) and $\beta_j$ the corresponding vector of effects for the jth trait, $u_{jk} = (u_{1jk}, \ldots, u_{njk})', (k = 1, \ldots, q)$ is an $n$-dimensional vector of random effects, and $\varepsilon_j = (\varepsilon_{1j}, \ldots, \varepsilon_{nj})'$ is a vector of model residuals.
 
-It handles a variable number of random effects, which are specified in the argument K (for kernel). K is a two level list. Each of the inner elements of the list is used to specify one random effect. For each random effect you need to provide a co-variance structure, see below K=G, and a type argument that specifies the form of the within subject covariance. The program supports several, the most important ones are type='UN', type='DIAG' and type='FA', which stands for unstructured, diagonal and factor-analytic, respectively. You also need to specify hyper-parameters for prior distribution. For UN we use an inverse-Whishart prior; therefore, you need to specify prior degrees of freedom (df0, real number, df0 > q - 1) and a scale matrix (S0, q × q positive definite, I usually use a diagonal scale matrix, see example below). For DIAG we assign scaled inverse chi-squares to each of the diagonal elements; therefore, df0 and S0 must be vectors (q-dimensional each), and each entry defines the degrees of freedom and scale parameter of a scaled inverse chi-square distribution. For FA you need to specify the number of factors (nF, integer, nF > 1). For this model you also need to specify the degrees of freedom and scale parameters of the variances of the specific factors, these are specified with a vector df0 and a vector S0.
 
-For the residual variance we indicate the structure and the hyper-parameters using the argument resCov, which is a list (see below).
 
-The program will introduce one intercept by default (fm$mu), if you want to include fixed effects you need to provide an incidence matrix (Xf, n × r, r = number of fixed effects). The program applies these effects to all traits.
+## Conditional distribution of the data
 
-Example
--------
+Model residuals are assumed to follow a multivariate normal distribution, with null mean and covariance matrix $\text{Cov}(\varepsilon_1', \ldots, \varepsilon_n')' = R_0 \otimes I$ where $R_0$ is an $r \times r$ (within-subject) covariance matrix of model residuals and $I$ is an $n$-dimensional identity matrix. Therefore, the conditional distribution of the data given the location and dispersion parameters is
 
-Example of the use of the script with the wheat data set available at BGLR library. The data has only 4 traits, the example uses un-structured co-variance matrix for the genetic part, and, since these records come from different sites, uses a diagonal co-variance matrix for the residuals.
+$$ p(y_1, \ldots, y_r | \beta_1, \ldots, u_1, \ldots, u_r) = \prod_{i = 1}^n \text{MVN}(y_i | \eta_i, R_0) $$
 
-```{r, eval=FALSE}
-rm(list=ls())
-source('~/Dropbox/MTM/code/MTM7.r')
+where $\text{MVN}(.|.,.)$ denotes a multivariate-normal density with mean $\eta_i$ and covariance matrix $R_0$; here, $\eta_i$ is an $r$-dimensional vector whose entries are the expected phenotypic values of the ith individual for each of the traits, that is
 
+$$ \eta_i = \begin{bmatrix}
+  \eta_{1i} \\
+  \vdots \\
+  \eta_{ri} \\
+\end{bmatrix} = \begin{bmatrix}
+  \mu_1 + x'_1 \beta_1 + u_{i11} + \ldots + u_{i1q} \\
+  \vdots \\
+  \mu_r + x'_1 \beta_r + u_{ir1} + \ldots + u_{irq} \\
+\end{bmatrix} $$
+
+
+
+## Prior distribution
+
+The prior distribution is structured hierarchically. The first level of the prior specifies the distribution of the fixed and random effects given the codispersion parameters (the covariance matrices of the random effects, see below). The priors for the codispersion parameters are specified in a deeper level of the hierarchy.
+
+The **intercepts and vectors of fixed effects** are assigned flat prior (each unknown is assigned a Gaussian prior with null mean and very large variance).
+
+The vectors of **random effects** are assigned independent multivariate normal priors with null mean and covariance matrices $\text{Cov}(u_k) = G_k \otimes K_k$ where $u_k$ represent the vector of effects for the kth random effects (sorted by subject first and trait within subject), $G_k$ is an $r \times r$ (within-subject) covariance matrix of the kth random effect and $K_k$ is a user-defined (between subjects) covariance matrix for the kth random effect. For instance,  may be a pedigree or marker-based relationship matrix.
+
+Finally, the covariance matrices of random effects are assigned Inverse Whishart priors (for the case of unstructured options, see below) or priors that are structured according to some model (the options implemented are diagonal, recursive and factor analytic).
+
+
+
+## Algorithm
+
+Internally, MTM uses an orthogonal representation of each of the random effects which is based on the eigenvalue decomposition of the covariance structures ($K_k$). Samples from all the model unknowns are drawn using a Gibbs sampler (i.e., based on fully conditional distributions).
+
+
+
+## Parameters
+
+The arguments of the MTM function are:
+
+- `Y` ($n \times q$), a numeric matrix with phenotypes (rows for individuals, columns for traits, `NA`s can be present)
+- `XF` ($n \times s$), the design matrix for fixed effects. Should be a numeric matrix with individuals in rows and predictors in columns. The same effects are included for all traits with phenotypes (rows for individuals, columns for traits. `NA`s can be present).
+- `K` ($q$-dimensional list), a hierarchical list where the first level is used to specify random effects (each entry of K defines one random effect). Inside each of the elements of the list a nested list provides the elements needed to specify a random effect. The examples printed below illustrate how to specify various covariance structures.
+- `resCov` (list), used to specify the structure of the residual covariance matrix.
+- `nIter`, `thin`, `burnIn` (int), the number of iterations, thinning and burn-in for the sampler.
+- `saveAt` (character), a path and a prefix for the files generated by MTM (these files contain the samples collected by MTM).
+- ...
+
+
+
+## Examples
+
+In the following examples we illustrate how to specify random and fixed effect and covariance structures in MTM.
+
+
+### Random effects with unstructured covariance matrices
+The first random effect will be unstructured and will be assigned a Scaled-Inverse Chi-square with degree of freedom (scalar) `df0`, and scale (matrix, $r \times r$) `S0`.
+The following example illustrates how to fit a multiple-trait model using a data set available in the BGLR package comprising 599 wheat lines and 4 traits. In this example the covariance matrix of the random effect and that of model residuals are specified as unstructured.
+
+#### Example 1: Random effect model with unstructured covariance matrices
+```r
+rm(list = ls())
+
+library(MTM)
 library(BGLR)
+
 data(wheat)
-G<-tcrossprod(scale(wheat.X,center=TRUE,scale=TRUE))/ncol(wheat.X)
+Y <- wheat.Y
+A <- wheat.A
 
-nTraits<-ncol(wheat.Y)
-df0<-3
-R2<-0.5
-
-## NOTE: K is similar to ETA in BGLR, but only for RKHS in the case of this program.
-## One can provide K or EVD via V and d, I believe...
-## Use much longer chains, this is just an example!
-
-fm<-MTM(Y=wheat.Y,
-  K=list(
-    list(K=G,
-      COV=list(type='UN',df0=(df0+nTraits),S0=diag(R2*(df0+2*nTraits+1),nTraits))
+fm <- MTM(
+  Y = Y,
+  K = list(
+    list(
+      K = A,
+      COV = list(
+        type = 'UN',
+        df0 = 4,
+        S0 = diag(4)
+      )
     )
   ),
-  resCov=list(type='DIAG',df0=rep(df0,nTraits),S0=diag(R2*df0/(df0+2),nTraits)),
-  nIter=500,burnIn=100
+  resCov = list(
+    type = 'UN',
+    S0 = diag(4),
+    df0 = 4
+  ),
+  nIter = 120,
+  burnIn = 20,
+  thin = 5,
+  saveAt = 'ex1_'
 )
-## Some estimates
-fm$K[[1]]$G # estimated genomic covariance matrix
-fm$K[[1]]$U # predicted genomic values
-fm$resCov$R # estimated residual covariance matrix
+
+# Retrieving estimates
+fm$YHat # predicitons
+fm$resCov$R # residual covariance matrix
+fm$K[[1]]$G # genetic covariance matrix
+fm$K[[1]]$U # random effects
+
+# Samples
+list.files(pattern = 'ex1_')
+plot(scan('ex1_logLik.dat'),type = 'o')
+G <- read.table('ex1_G_1.dat')
+R <- read.table('ex1_R.dat')
 ```
+
+
+### Diagonal covariance matrix
+The following example illustrates how to specify a diagonal covariance structure on model residuals. The same specification could be used for the covariance matrix of random effects.
+
+#### Example 2: Diagonal residual covariance matrix
+```r
+rm(list = ls())
+
+library(MTM)
+library(BGLR)
+
+data(wheat)
+Y <- wheat.Y
+A <- wheat.A
+
+fm <- MTM(
+  Y = Y,
+  K = list(
+    list(
+      K = A,
+      COV = list(
+        type = 'UN',
+        df0 = 4,
+        S0 = diag(4)
+      )
+    )
+  ),
+  resCov = list(
+    type = 'DIAG',
+    S0 = rep(1, 4),
+    df0 = rep(1, 4)
+  ),
+  nIter = 120,
+  burnIn = 20,
+  thin = 5,
+  saveAt = 'ex2_'
+)
+
+# Retrieving some estimates
+fm$resCov$R # residual covariance matrix
+
+# Samples
+R <- read.table('ex2_R.dat')
+head(R)
+```
+
+
+### Factor Analytic
+In Factor Analysis (FA), a covariance matrix is decomposed into common and specific factors according to $G_k = B_k B'_k + \Psi_k$ where $B_k$ is a matrix of loadings (regressions of the original random effects into common factors) and $\Psi_k$ is a diagonal matrix whose non-null entries give the variances of factors that are trait-specific. The number of common factors (the number of columns of $B_k$) is specified with the argument `nF`. Restrictions apply as with any FA model on the maximum number of factors that can be specified depending on the number of traits, in particular `r(1 + nF) <= r * (r + 1) / 2`.
+In MTM the loadings are assigned flat priors (normal priors with null mean and large variance) and the variances of the specific factors are assigned scaled-invers chi-squared with df and scale given by parameters `df0` and `S0` (see example below).
+The following example modifies Example 2 by specifying a 1-common factor model. The matrix `M` in the example is a logical matrix of the same dimensions as $B_k$ with `TRUE` for loadings that the user want to estimate, and `FALSE` for those that should be zeroed out. The parameter `$var` is the prior variance of the Gaussian prior assigned to the unknown loadings.
+
+#### Example 3: Factor analysis
+```r
+rm(list = ls())
+
+library(MTM)
+library(BGLR)
+
+data(wheat)
+Y <- wheat.Y
+A <- wheat.A
+
+M <- matrix(nrow = 4, ncol = 1, TRUE)
+
+fm <- MTM(
+  Y = Y,
+  K = list(
+    list(
+      K = A,
+      COV = list(
+        type = 'FA',
+        M = M,
+        S0 = rep(1, 4),
+        df0 = rep(1, 4),
+        var = 100
+      )
+    )
+  ),
+  resCov = list(
+    type = 'DIAG',
+    S0 = rep(1, 4),
+    df0 = rep(1, 4)
+  ),
+  nIter = 1200,
+  burnIn = 200,
+  thin = 5,
+  saveAt='ex3_'
+)
+
+# Retrieving some estimates
+fm$K[[1]]$B # Estimated loadings
+fm$K[[1]]$PSI # Estimated variance of trait-specific factors
+fm$K[[1]]$G # Posterior mean of BB’+Psi
+
+# samples
+list.files(pattern='ex3_')
+```
+
+
+### Recursive models
+In recursive models covariances are modeled as regressions. For instance, a recursive model for the covariance matrix of the vector $x$ can be $x = Bx + \delta$ where $B$ is matrix of regression coefficients (typically lower-triangular) with zeros in the diagonal and $\delta$ is a random vector (independent normal random variables in MTM). The covariance matrix of $x$ is $\text{Cov}(x, x') = (I - B)^{-1} \Psi ((I - B)^{-1})'$ where $\Psi$ is the covariance matrix of $\delta$(diagonal in MTM). The parameters of the model include the recursive effects and the variance of $\delta$. The first ones are assigned IID normal priors with null mean and variance `$var` and the variances are assigned IID scaled-inverse chi-squares priors.
+The following example illustrates the implementation of a recursive covariance structure in MTM.
+
+#### Example 4: Recursive
+```r
+rm(list = ls())
+
+library(MTM)
+library(BGLR)
+
+data(wheat)
+Y <- wheat.Y
+A <- wheat.A
+
+M <- matrix(nrow = 4, ncol = 4, FALSE)
+M[3, 2] <- M[4, 2] <- T # Adding recursion from trait 2 onto traits 3 and 4
+M[4, 3] <- T # Adding recursion from trait 3 on trait 4
+
+fm <- MTM(
+  Y = Y,
+  K = list(
+    list(
+      K = A,
+      COV = list(
+        type = 'REC',
+        M = M,
+        S0 = rep(1, 4),
+        df0 = rep(1,4),
+        var = 100
+      )
+    )
+  ),
+  resCov = list(
+    type = 'DIAG',
+    S0 = rep(1, 4),
+    df0 = rep(1, 4)
+  ),
+  nIter = 1200,
+  burnIn = 200,
+  thin = 5,
+  saveAt='ex4_'
+)
+ 
+# Retrieving some estimates
+fm$K[[1]]$B # Recursive effects
+fm$K[[1]]$PSI # Estimated variance
+fm$K[[1]]$G # Posterior mean of the covariance matrix
+
+# It should not be that different than
+T = solve(diag(4) - fm$K[[1]]$B)
+T %*% diag(fm$K[[1]]$PSI) %*% t(T)
+
+# Samples
+list.files(pattern='ex4_')
+```
+
+
+### Adding fixed effects
+Fixed effects can be added in any of the examples presented above by adding an argument `XF` which is the design matrix for fixed effects. To illustrate we modify Example 1 by: (i) adding a simulated fixed effect, and (ii) including it when fitting the model.
+
+#### Example 5: Mixed-effects model
+```r
+rm(list = ls())
+
+library(MTM)
+library(BGLR)
+
+data(wheat)
+Y <- wheat.Y
+A <- wheat.A
+
+# Simulating a fixed effect
+Z <- matrix(rnorm(2*599), ncol = 2)
+B <- rbind(c(1, 2, 3, -2), c(-2, 1, 0, 2))
+for (i in 1:4) {
+  Y[, i] <- Y[, i] + Z %*% B[, i]
+}
+
+fm <- MTM(
+  XF = Z,
+  Y = Y,
+  K = list(
+    list(
+      K = A,
+      COV = list(
+        type = 'UN',
+        df0 = 4,
+        S0 = diag(4)
+      )
+    )
+  ),
+  resCov = list(
+    type = 'UN',
+    S0 = diag(4),
+    df0 = 4
+  ),
+  nIter = 1200,
+  burnIn = 200,
+  thin = 5,
+  saveAt='ex5_'
+)
+
+# Retrieving estimates of fixed effects
+fm$B.f
+```
+
+
+### Using eigenvalues and eigenvectors
+In the examples presented above, the argument `K` was used to specify covariances between effects of the different the levels of a random effect. Instead, alternatively, one can also provide the eigenvalue decomposition.
+The following example is equivalent to Example 1 but uses the eigenvalue decomposition of `A`, instead of `A` as input.
+
+#### Example 6: Using eigenvalues and eigenvectors
+```r
+rm(list = ls())
+
+library(MTM)
+library(BGLR)
+
+data(wheat)
+Y <- wheat.Y
+A <- wheat.A
+
+# Simulating a fixed effect
+EVD <- eigen(A)
+
+fm <- MTM(
+  Y = Y,
+  K = list(
+    list(
+      EVD = EVD,
+      COV = list(
+        type='UN',
+        df0 = 4,
+        S0 = diag(4)
+      )
+    )
+  ),
+  resCov = list(
+    type = 'UN',
+    S0 = diag(4),
+    df0 = 4
+  ),
+  nIter = 1200,
+  burnIn = 200,
+  thin = 5,
+  saveAt='ex6_'
+)
+```
+
+
+
+## Authors
+
+### Development & Maintenance
+- Gustavo de los Campos (gdeloscampos@gmail.com)
+- Alexander Grüneberg (alexander.grueneberg@googlemail.com)
+
+### Contributors
+- Ana I. Vazquez (anainesvs@gmail.com)
+- Hwasoon Kim (hskim28@uab.edu)
