@@ -381,7 +381,7 @@ fm <- MTM(
 
 ### Development & Maintenance
 - Gustavo de los Campos (gdeloscampos@gmail.com)
-- Alexander Grüneberg (alexander.grueneberg@googlemail.com)
+- Alexander Grueneberg (cran@agrueneberg.info)
 
 ### Contributors
 - Ana I. Vazquez (anainesvs@gmail.com)
